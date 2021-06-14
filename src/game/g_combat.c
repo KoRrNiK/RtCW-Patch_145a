@@ -355,6 +355,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		return;
 	}
 
+
 //----(SA) commented out as we have no hook
 //	if (self->client && self->client->hook)
 //		Weapon_HookFree(self->client->hook);
@@ -1001,6 +1002,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			case MOD_DYNAMITE:
 			case MOD_DYNAMITE_SPLASH:
 				break;
+
 
 			default:
 				return;

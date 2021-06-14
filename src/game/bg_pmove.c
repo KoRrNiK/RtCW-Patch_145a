@@ -1249,6 +1249,8 @@ static void PM_CrashLand( void ) {
 	float t;
 	float a, b, c, den;
 
+
+
 	// Ridah, only play this if coming down hard
 	if ( !pm->ps->legsTimer ) {
 		if ( pml.previous_velocity[2] < -220 ) {
@@ -1296,6 +1298,7 @@ static void PM_CrashLand( void ) {
 	// SURF_NODAMAGE is used for bounce pads where you don't ever
 	// want to take damage or play a crunch sound
 	if ( !( pml.groundTrace.surfaceFlags & SURF_NODAMAGE ) ) {
+		
 		if ( pm->debugLevel ) {
 			Com_Printf( "delta: %5.2f\n", delta );
 		}
@@ -1311,9 +1314,12 @@ static void PM_CrashLand( void ) {
 //----(SA)	end
 
 		if ( delta > 77 ) {
-			PM_AddFallEvent( EV_FALL_NDIE, pml.groundTrace.surfaceFlags );
+
+			PM_AddFallEvent(EV_FALL_NDIE, pml.groundTrace.surfaceFlags);
+
 		} else if ( delta > 67 ) {
-			PM_AddFallEvent( EV_FALL_DMG_50, pml.groundTrace.surfaceFlags );
+
+			PM_AddFallEvent(EV_FALL_DMG_50, pml.groundTrace.surfaceFlags);
 		} else if ( delta > 58 ) {
 			// this is a pain grunt, so don't play it if dead
 			if ( pm->ps->stats[STAT_HEALTH] > 0 ) {

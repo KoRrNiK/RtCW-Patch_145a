@@ -1217,6 +1217,12 @@ static void CG_DrawUpperRight( void ) {
 	if ( cg_drawTimer.integer ) {
 		y = CG_DrawTimer( y );
 	}
+
+	if (cg_drawVelocity.integer) {
+		CG_drawVelocity();
+	}
+	
+
 // (SA) disabling drawattacker for the time being
 //	if ( cg_drawAttacker.integer ) {
 //		y = CG_DrawAttacker( y );
@@ -3639,3 +3645,84 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 }
 
 
+/*
+==================
+CG_Velocity
+==================
+*/
+// KoRrNiK - Added
+static float CG_drawVelocity() {
+
+	char* s;
+	int		w;
+	int		x;
+	float	vel;
+
+
+	if (!(cg.snap->ps.pm_flags & PMF_LADDER)) {
+		vel = VectorLength(cg.snap->ps.velocity);
+	}
+	else vel = 0;
+
+	s = va("%i", (int)vel);
+
+	w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
+
+	w = CG_DrawStrlen(s);
+	x = (SCREEN_WIDTH - w) / 2;
+
+	if (!cg_velocity_size.integer || cg_velocity_size.integer == 1) {
+		if (vel > 1000) x -= 16;
+		else if (vel > 100) x -= 11;
+		else if (vel > 10) x -= 8;
+		else x -= 3;
+	}
+	else if (cg_velocity_size.integer == 2) {
+		if (vel > 1000) x -= 31;
+		else if (vel > 100) x -= 23;
+		else if (vel > 10) x -= 17;
+		else x -= 7;
+	}
+	else {
+		if (vel > 1000) x -= 54;
+		else if (vel > 100) x -= 43;
+		else if (vel > 10) x -= 35;
+		else x -= 15;
+	}
+
+	vec3_t hcolor;
+
+	for (int i = 0; i < 4; i++) hcolor[i] = 1.0;
+
+	int font_w = !cg_velocity_size.integer ? TINYCHAR_WIDTH : cg_velocity_size.integer == 1 ? SMALLCHAR_WIDTH : cg_velocity_size.integer == 2 ? BIGCHAR_WIDTH : GIANTCHAR_WIDTH;
+	int font_h = !cg_velocity_size.integer ? TINYCHAR_HEIGHT : cg_velocity_size.integer == 1 ? SMALLCHAR_HEIGHT : cg_velocity_size.integer == 2 ? BIGCHAR_HEIGHT : GIANTCHAR_HEIGHT;
+
+	if (cg_velocity_type.value == 0) CG_DrawStringExt(x, cg_velocity_size.integer >= 3 ? (STATUSBARHEIGHT - 30) : (STATUSBARHEIGHT + 5), s, hcolor, qfalse, qtrue, font_w,font_h,TEAM_OVERLAY_MAXLOCATION_WIDTH, ALIGN_BOTTOM);
+	else CG_DrawStringExt(x, cg_velocity_size.integer >= 3 ? (STATUSBARHEIGHT / 2) + 40 : (STATUSBARHEIGHT / 2) + 30, s, hcolor, qfalse, qtrue, font_w,font_h, TEAM_OVERLAY_MAXLOCATION_WIDTH, ALIGN_CENTER);
+
+
+	/*
+	if (cg_velocity_size.integer == 1) {
+
+		if (vel > 1000) x -= 33;
+		else if (vel > 100) x -= 23;
+		else if (vel > 10) x -= 16;
+		else x -= 7;
+
+		if (cg_velocity_type.value == 0) CG_DrawBigString(x, STATUSBARHEIGHT + 5, s, 1.0F, ALIGN_BOTTOM);
+		else CG_DrawBigString(x, (STATUSBARHEIGHT / 2) + 30, s, 1.0F, ALIGN_CENTER);
+
+	} else {
+
+		if (vel > 1000) x -= 16;
+		else if (vel > 100) x -= 11;
+		else if (vel > 10) x -= 8;
+		else x -= 3;
+
+		if (cg_velocity_type.value == 0) CG_DrawSmallString(x, STATUSBARHEIGHT + 5, s, 1.0F, ALIGN_BOTTOM);
+		else CG_DrawSmallString(x, (STATUSBARHEIGHT / 2) + 30, s, 1.0F, ALIGN_CENTER);
+
+	}*/
+	
+
+}

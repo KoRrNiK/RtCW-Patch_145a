@@ -831,9 +831,9 @@ static int CG_CalcFov( void ) {
 		fov_x = 90;
 	} else {
 		// user selectable
-		if ( cgs.dmflags & DF_FIXED_FOV ) {
+		if ((cgs.dmflags & DF_FIXED_FOV)) {
 			// dmflag to prevent wide fov for all clients
-			fov_x = 90;
+			cg.fov = fov_x = 90;
 		} else {
 			fov_x = cg_fov.value;
 			if ( fov_x < 1 ) {
@@ -841,6 +841,9 @@ static int CG_CalcFov( void ) {
 			} else if ( fov_x > 160 ) {
 				fov_x = 160;
 			}
+			
+			cg.fov = fov_x;
+			
 		}
 
 		// account for zooms
@@ -909,6 +912,7 @@ static int CG_CalcFov( void ) {
 	x = cg.refdef.width / tan( fov_x / 360 * M_PI );
 	fov_y = atan2( cg.refdef.height, x );
 	fov_y = fov_y * 360 / M_PI;
+
 
 	// warp if underwater
 	contents = CG_PointContents( cg.refdef.vieworg, -1 );
@@ -1099,6 +1103,8 @@ static int CG_CalcViewValues( void ) {
 				fov = min(fov, 160);
 			}
 			// end Knightmare
+			
+			
 
 			x = cg.refdef.width / tan( fov / 360 * M_PI );
 			cg.refdef.fov_y = atan2( cg.refdef.height, x );
@@ -1363,7 +1369,7 @@ void CG_DrawSkyBoxPortal( void ) {
 			fov_x = 90;
 		} else {
 			// user selectable
-			if ( cgs.dmflags & DF_FIXED_FOV ) {
+			if ((cgs.dmflags & DF_FIXED_FOV)) {
 				// dmflag to prevent wide fov for all clients
 				fov_x = 90;
 			} else {
@@ -1429,6 +1435,8 @@ void CG_DrawSkyBoxPortal( void ) {
 			fov_x = min(fov_x, 160);
 		}
 		// end Knightmare
+
+
 
 		x = cg.refdef.width / tan( fov_x / 360 * M_PI );
 		fov_y = atan2( cg.refdef.height, x );
@@ -1683,4 +1691,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	DEBUGTIME
 }
-

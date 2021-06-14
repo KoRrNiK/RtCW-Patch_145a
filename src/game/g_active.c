@@ -593,26 +593,22 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 		eventParm = client->ps.eventParms[ i & ( MAX_EVENTS - 1 ) ];
 
 		switch ( event ) {
-		case EV_FALL_NDIE:
 		case EV_FALL_DMG_10:
 		case EV_FALL_DMG_15:
 		case EV_FALL_DMG_25:
 		case EV_FALL_DMG_50:
+		case EV_FALL_NDIE:
 
-			if ( ent->s.eType != ET_PLAYER ) {
-				break;      // not in the player model
-			}
-
-			if ( g_dmflags.integer & DF_NO_FALLING ) {
-				break;
-			}
+			if ( ent->s.eType != ET_PLAYER ) break;      // not in the player model
+			if ( g_dmflags.integer & DF_NO_FALLING ) break;
+			if ( ent->client->ps.stats[STAT_HEALTH] <= 0) break;
 
 			stunTime = 0;   //----(SA)	added
 			fallSoundMul = 1.0f;    // default to normal range
 
 //----(SA)	FIXME: TODO:  hmm, going through here adding surfaceparms it seems that the value for ent->client->ps.pm_time was weird.  (1000 for all but dmg_25 which has 250?)
 			if ( event == EV_FALL_NDIE ) {
-				damage = 9999;
+				damage = (ent->client->ps.stats[STAT_HEALTH]) + (ent->client->ps.stats[STAT_ARMOR]);
 			} else if ( event == EV_FALL_DMG_50 ) {
 				damage = 50;
 				stunTime = 1000;
@@ -643,6 +639,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 
 			VectorSet( dir, 0, 0, 1 );
 			ent->pain_debounce_time = level.time + 200; // no normal pain sound
+			
 			G_Damage( ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING );
 			// falls through to FALL_SHORT
 

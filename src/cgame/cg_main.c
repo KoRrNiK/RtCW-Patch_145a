@@ -117,6 +117,11 @@ vmCvar_t cg_shadows;
 vmCvar_t cg_gibs;
 vmCvar_t cg_drawTimer;
 vmCvar_t cg_drawFPS;
+
+vmCvar_t cg_drawVelocity;
+vmCvar_t cg_velocity_type;
+vmCvar_t cg_velocity_size;
+
 vmCvar_t cg_drawSnapshot;
 vmCvar_t cg_draw3dIcons;
 vmCvar_t cg_drawIcons;
@@ -171,7 +176,13 @@ vmCvar_t cg_tracerSpeed;
 vmCvar_t cg_autoswitch;
 vmCvar_t cg_ignore;
 vmCvar_t cg_simpleItems;
+
 vmCvar_t cg_fov;
+vmCvar_t cg_fov_down;
+vmCvar_t cg_fov_lr;
+
+vmCvar_t cg_fixedAspect;
+
 vmCvar_t cg_widescreen_fov;		// Knightmare added
 vmCvar_t cg_zoomFov;
 vmCvar_t cg_zoomStepBinoc;
@@ -325,7 +336,13 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomStepSniper, "cg_zoomStepSniper", "2", CVAR_ARCHIVE },
 	{ &cg_zoomStepSnooper, "cg_zoomStepSnooper", "5", CVAR_ARCHIVE },
 	{ &cg_zoomStepFG, "cg_zoomStepFG", "10", CVAR_ARCHIVE },          //----(SA)	added
-	{ &cg_fov, "cg_fov", "90", CVAR_ARCHIVE | CVAR_CHEAT }, // JPW NERVE added cheat protect	NOTE: there is already a dmflag (DF_FIXED_FOV) to allow server control of this cheat
+
+	{ &cg_fov, "cg_fov", "90", CVAR_ARCHIVE }, // JPW NERVE added cheat protect	NOTE: there is already a dmflag (DF_FIXED_FOV) to allow server control of this cheat
+	{ &cg_fov_down, "cg_fov_down", "90", CVAR_ARCHIVE }, 
+	{ &cg_fov_lr, "cg_fov_lr", "90", CVAR_ARCHIVE }, 
+
+	{ &cg_fixedAspect, "cg_fixedAspect", "1", CVAR_ARCHIVE }, // Essentially the same as setting DF_FIXED_FOV for widescreen aspects
+
 	{ &cg_widescreen_fov, "cg_widescreen_fov", "1", CVAR_ARCHIVE },	// Knightmare added
 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
 	{ &cg_letterbox, "cg_letterbox", "0", CVAR_TEMP },    //----(SA)	added
@@ -338,6 +355,11 @@ cvarTable_t cvarTable[] = {
 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 	{ &cg_drawFPS, "cg_drawFPS", "0", CVAR_ARCHIVE  },
+	
+	{ &cg_drawVelocity, "cg_drawVelocity", "0", CVAR_ARCHIVE  },
+	{ &cg_velocity_type, "cg_velocity_type", "0", CVAR_ARCHIVE  },
+	{ &cg_velocity_size, "cg_velocity_size", "0", CVAR_ARCHIVE  },
+	
 	{ &cg_drawSnapshot, "cg_drawSnapshot", "0", CVAR_ARCHIVE  },
 	{ &cg_draw3dIcons, "cg_draw3dIcons", "1", CVAR_ARCHIVE  },
 	{ &cg_drawIcons, "cg_drawIcons", "1", CVAR_ARCHIVE  },

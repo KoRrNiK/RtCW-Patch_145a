@@ -799,6 +799,8 @@ typedef struct {
 	// view rendering
 	refdef_t refdef;
 	vec3_t refdefViewAngles;            // will be converted to refdef.viewaxis
+	float fov;
+
 
 	// zoom key
 	qboolean zoomed;
@@ -1630,6 +1632,12 @@ extern vmCvar_t cg_shadows;
 extern vmCvar_t cg_gibs;
 extern vmCvar_t cg_drawTimer;
 extern vmCvar_t cg_drawFPS;
+
+extern vmCvar_t cg_drawVelocity;
+extern vmCvar_t cg_velocity_type;
+extern vmCvar_t cg_velocity_size;
+
+
 extern vmCvar_t cg_drawSnapshot;
 extern vmCvar_t cg_draw3dIcons;
 extern vmCvar_t cg_drawIcons;
@@ -1685,7 +1693,13 @@ extern vmCvar_t cg_tracerSpeed;
 extern vmCvar_t cg_autoswitch;
 extern vmCvar_t cg_ignore;
 extern vmCvar_t cg_simpleItems;
+
 extern vmCvar_t cg_fov;
+extern vmCvar_t cg_fov_down;
+extern vmCvar_t cg_fov_lr;
+
+extern vmCvar_t cg_fixedAspect;
+
 extern vmCvar_t cg_widescreen_fov;		// Knightmare added
 extern vmCvar_t cg_zoomFov;
 extern vmCvar_t cg_zoomDefaultBinoc;

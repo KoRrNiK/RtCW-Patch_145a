@@ -3009,107 +3009,123 @@ CG_AddViewWeapon
 Add the weapon, and flash for the player's view
 ==============
 */
-void CG_AddViewWeapon( playerState_t *ps ) {
+void CG_AddViewWeapon(playerState_t* ps) {
 	refEntity_t hand;
-	float fovOffset;
+	vec3_t		fovOffset;
 	vec3_t angles;
 	vec3_t gunoff;
-	weaponInfo_t    *weapon;
+	weaponInfo_t* weapon;
 
-	if ( ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
+	if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
 		return;
 	}
 
-	if ( ps->pm_type == PM_INTERMISSION ) {
+	if (ps->pm_type == PM_INTERMISSION) {
 		return;
 	}
 
 	// no gun if in third person view
-	if ( cg.renderingThirdPerson ) {
+	if (cg.renderingThirdPerson) {
 		return;
 	}
 
 	// allow the gun to be completely removed
-	if ( !cg_drawGun.integer ) {
-/*
-		vec3_t		origin;
-
-		if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {
-			// special hack for lightning gun...
-			VectorCopy( cg.refdef.vieworg, origin );
-			VectorMA( origin, -8, cg.refdef.viewaxis[2], origin );
-			CG_LightningBolt( &cg_entities[ps->clientNum], origin );
-		}
-*/
+	if (!cg_drawGun.integer) {
+		/*
+				vec3_t		origin;
+				if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {
+					// special hack for lightning gun...
+					VectorCopy( cg.refdef.vieworg, origin );
+					VectorMA( origin, -8, cg.refdef.viewaxis[2], origin );
+					CG_LightningBolt( &cg_entities[ps->clientNum], origin );
+				}
+		*/
 		return;
 	}
 
 	// don't draw if testing a gun model
-	if ( cg.testGun ) {
+	if (cg.testGun) {
 		return;
 	}
 
-	if ( ps->eFlags & EF_MG42_ACTIVE ) {
+	if (ps->eFlags & EF_MG42_ACTIVE) {
 		return;
 	}
 
+	VectorClear(fovOffset);
 
-	// drop gun lower at higher fov
-	if ( cg_fov.integer > 90 ) {
-		fovOffset = -0.2 * ( cg_fov.integer - 90 );
-	} else {
-		fovOffset = 0;
+	if (cg_fov_down.integer >= 60) {
+		// UP - DOWN
+		fovOffset[2] = -0.2 * (cg_fov_down.integer - 90);
 	}
 
-	if ( ps->weapon > WP_NONE ) {
+
+	if (cg_fov_lr.integer >= 0) {
+		// LEFT - RIGHT
+		fovOffset[1] = -0.2 * (cg_fov_lr.integer - 90);
+
+	}
+
+	if (cg.fov < 90) {
+		// move gun forward at lower fov
+		fovOffset[0] = -0.2 * (cg.fov - 90) * cg.refdef.fov_x / cg.fov;
+	}
+
+
+
+	
+
+	if (ps->weapon > WP_NONE) {
 		// DHM - Nerve :: handle WP_CLASS_SPECIAL for different classes
-		if ( cgs.gametype == GT_WOLF && ps->weapon == WP_CLASS_SPECIAL ) {
-			switch ( ps->stats[ STAT_PLAYER_CLASS ] ) {
+		if (cgs.gametype == GT_WOLF && ps->weapon == WP_CLASS_SPECIAL) {
+			switch (ps->stats[STAT_PLAYER_CLASS]) {
 			case PC_ENGINEER:
-				CG_RegisterWeapon( WP_CLASS_SPECIAL );
-				weapon = &cg_weapons[ WP_CLASS_SPECIAL ];
+				CG_RegisterWeapon(WP_CLASS_SPECIAL);
+				weapon = &cg_weapons[WP_CLASS_SPECIAL];
 				break;
 			case PC_MEDIC:
-				CG_RegisterWeapon( WP_MEDIC_HEAL );
-				weapon = &cg_weapons[ WP_MEDIC_HEAL ];
+				CG_RegisterWeapon(WP_MEDIC_HEAL);
+				weapon = &cg_weapons[WP_MEDIC_HEAL];
 				break;
 			case PC_LT:
-				CG_RegisterWeapon( WP_GRENADE_SMOKE );
-				weapon = &cg_weapons[ WP_GRENADE_SMOKE ];
+				CG_RegisterWeapon(WP_GRENADE_SMOKE);
+				weapon = &cg_weapons[WP_GRENADE_SMOKE];
 				break;
 			default:
-				CG_RegisterWeapon( ps->weapon );
-				weapon = &cg_weapons[ ps->weapon ];
+				CG_RegisterWeapon(ps->weapon);
+				weapon = &cg_weapons[ps->weapon];
 				break;
 			}
-		} else {
-			CG_RegisterWeapon( ps->weapon );
-			weapon = &cg_weapons[ ps->weapon ];
+		}
+		else {
+			CG_RegisterWeapon(ps->weapon);
+			weapon = &cg_weapons[ps->weapon];
 		}
 		// dhm - end
 
-		memset( &hand, 0, sizeof( hand ) );
+		memset(&hand, 0, sizeof(hand));
 
 		// set up gun position
-		CG_CalculateWeaponPosition( hand.origin, angles );
+		CG_CalculateWeaponPosition(hand.origin, angles);
 
 		gunoff[0] = cg_gun_x.value;
 		gunoff[1] = cg_gun_y.value;
 		gunoff[2] = cg_gun_z.value;
 
-//----(SA)	removed
+		//----(SA)	removed
 
-		VectorMA( hand.origin, gunoff[0], cg.refdef.viewaxis[0], hand.origin );
-		VectorMA( hand.origin, gunoff[1], cg.refdef.viewaxis[1], hand.origin );
-		VectorMA( hand.origin, ( gunoff[2] + fovOffset ), cg.refdef.viewaxis[2], hand.origin );
+		VectorMA(hand.origin, (gunoff[0] + fovOffset[0]), cg.refdef.viewaxis[0], hand.origin);
+		VectorMA(hand.origin, (gunoff[1] + fovOffset[1]), cg.refdef.viewaxis[1], hand.origin);
+		VectorMA(hand.origin, (gunoff[2] + fovOffset[2]), cg.refdef.viewaxis[2], hand.origin);
 
-		AnglesToAxis( angles, hand.axis );
+		AnglesToAxis(angles, hand.axis);
 
-		if ( cg_gun_frame.integer ) {
+		if (cg_gun_frame.integer) {
 			hand.frame = hand.oldframe = cg_gun_frame.integer;
 			hand.backlerp = 0;
-		} else {  // get the animation state
-			CG_WeaponAnimation( ps, weapon, &hand.oldframe, &hand.frame, &hand.backlerp );   //----(SA)	changed
+		}
+		else {  // get the animation state
+			CG_WeaponAnimation(ps, weapon, &hand.oldframe, &hand.frame, &hand.backlerp);   //----(SA)	changed
 		}
 
 
@@ -3117,14 +3133,14 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;   //----(SA)
 
 		// add everything onto the hand
-		CG_AddPlayerWeapon( &hand, ps, &cg.predictedPlayerEntity );
+		CG_AddPlayerWeapon(&hand, ps, &cg.predictedPlayerEntity);
 		// Ridah
 
 	}   // end  "if ( ps->weapon > WP_NONE)"
 
 	// Rafael
 	// add the foot
-	CG_AddPlayerFoot( &hand, ps, &cg.predictedPlayerEntity );
+	CG_AddPlayerFoot(&hand, ps, &cg.predictedPlayerEntity);
 
 	cg.predictedPlayerEntity.lastWeaponClientFrame = cg.clientFrame;
 }
