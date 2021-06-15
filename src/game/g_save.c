@@ -78,7 +78,7 @@ typedef enum {
 } saveFieldtype_t;
 
 typedef struct {
-	int ofs;
+	size_t ofs;
 	saveFieldtype_t type;
 } saveField_t;
 
@@ -163,7 +163,7 @@ static saveField_t castStateFields[] = {
 //.......................................................................................
 // this is where we define fields or sections of structures that we should totally ignore
 typedef struct {
-	int ofs;
+	size_t  ofs;
 	int len;
 } ignoreField_t;
 
@@ -204,7 +204,7 @@ static ignoreField_t castStateIgnoreFields[] = {
 // persistant data is optionally carried across level changes
 // !! WARNING: cannot save pointer or string variables
 typedef struct {
-	int ofs;
+	size_t  ofs;
 	int len;
 } persField_t;
 
@@ -788,7 +788,7 @@ ReadEntity
 void ReadEntity( fileHandle_t f, gentity_t *ent, int size ) {
 	saveField_t *field;
 	ignoreField_t *ifield;
-	gentity_t temp, backup, backup2;
+	gentity_t temp = { {0} }, backup, backup2;
 	vmCvar_t cvar;
 	int decodedSize;
 
@@ -1106,6 +1106,8 @@ qboolean G_SaveGame( char *username ) {
 	char mapstr[MAX_QPATH];
 	char leveltime[MAX_QPATH];
 	char healthstr[MAX_QPATH];
+
+
 	vmCvar_t mapname, episode;
 	fileHandle_t f;
 	int i, len;
@@ -1220,7 +1222,7 @@ qboolean G_SaveGame( char *username ) {
 
 
 //	Com_sprintf( infoString, sizeof(infoString), "Mission: %s\nDate: %s\nTime: %s\nGametime: %s\nHealth: %i",
-	Com_sprintf( infoString, sizeof( infoString ), "%s\n%s: %s\n%s: %i",
+	Com_sprintf( infoString, sizeof( infoString ), "%s\n%s: %s\n%s: %i\nDifficulty: %s",
 				 mapstr,
 				 leveltime,
 //		G_Save_DateStr(),
@@ -1232,7 +1234,8 @@ qboolean G_SaveGame( char *username ) {
 					 ( ( playtime / 1000 ) % 60 > 9 ? "" : "0" ), // second padding
 					 ( ( playtime / 1000 ) % 60 ) ),
 				 healthstr,
-				 g_entities[0].health );
+				 g_entities[0].health, 
+				 g_gameskill.integer == 0 ? "Don't hurt me." : g_gameskill.integer == 1 ? "Bring 'em on!" : "I am Death incarnate!");
 	// write it out
 	// length
 	i = strlen( infoString );
@@ -1390,305 +1393,305 @@ G_LoadGame
   Always loads in "current.svg". So if loading a specific savegame, first copy it to that.
 ===============
 */
-void G_LoadGame( char *filename ) {
+void G_LoadGame(char* filename) {
 	char mapname[MAX_QPATH];
+	char mapstr[MAX_QPATH];
 	fileHandle_t f;
 	int i, leveltime, size, last;
-	gentity_t   *ent;
-	gclient_t   *cl;
-	cast_state_t    *cs;
+	gentity_t* ent;
+	gclient_t* cl;
+	cast_state_t* cs;
 	qtime_t tm;
 	qboolean serverEntityUpdate = qfalse;
-	vmCvar_t episode;	// Knightmare added
+	vmCvar_t episode;
 
-	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {    // don't allow loads in MP
+	if (g_gametype.integer != GT_SINGLE_PLAYER) {    // don't allow loads in MP
 		return;
 	}
 
-	if ( saveGamePending ) {
+	if (saveGamePending) {
 		return;
 	}
 
-	G_DPrintf( "G_LoadGame '%s'\n", filename );
+	G_DPrintf("G_LoadGame '%s'\n", filename);
 
 	// enforce the "current" savegame, since that is used for all loads
 	filename = "save\\current.svg";
 
 	// open the file
-	if ( trap_FS_FOpenFile( filename, &f, FS_READ ) < 0 ) {
-		G_Error( "G_LoadGame: savegame '%s' not found\n", filename );
+	if (trap_FS_FOpenFile(filename, &f, FS_READ) < 0) {
+		G_Error("G_LoadGame: savegame '%s' not found\n", filename);
 	}
 
 	// read the version
-	trap_FS_Read( &i, sizeof( i ), f );
+	trap_FS_Read(&i, sizeof(i), f);
 	// TTimo
 	// show_bug.cgi?id=434
 	// 17 is the only version actually out in the wild
-	if ( i != SAVE_VERSION && i != 17 && i != 13 && i != 14 && i != 15 ) {    // 13 is beta7, 14 is pre "SA_MOVEDSTUFF"
-		trap_FS_FCloseFile( f );
-		G_Error( "G_LoadGame: savegame '%s' is wrong version (%i, should be %i)\n", filename, i, SAVE_VERSION );
+	if (i != SAVE_VERSION && i != 17 && i != 13 && i != 14 && i != 15) {    // 13 is beta7, 14 is pre "SA_MOVEDSTUFF"
+		trap_FS_FCloseFile(f);
+		G_Error("G_LoadGame: savegame '%s' is wrong version (%i, should be %i)\n", filename, i, SAVE_VERSION);
 	}
 	ver = i;
 
-	if ( ver == 17 ) {
+	if (ver == 17) {
 		// 17 saved games can be buggy (bug #434), let's just warn about it
-		G_Printf( "WARNING: backward compatibility, loading a version 17 saved game.\n"
-				  "some version 17 saved games may cause crashes during play.\n" );
+		G_Printf("WARNING: backward compatibility, loading a version 17 saved game.\n"
+			"some version 17 saved games may cause crashes during play.\n");
 	}
 
 	// read the mapname (this is only used in the sever exe, so just discard it)
-	trap_FS_Read( mapname, MAX_QPATH, f );
+	trap_FS_Read(mapname, MAX_QPATH, f);
+	Com_sprintf(mapstr, MAX_QPATH, "%s", mapname);
 
 	// read the level time
-	trap_FS_Read( &i, sizeof( i ), f );
+	trap_FS_Read(&i, sizeof(i), f);
 	leveltime = i;
 
 	// read the totalPlayTime
-	trap_FS_Read( &i, sizeof( i ), f );
-	if ( i > g_totalPlayTime.integer ) {
-		trap_Cvar_Set( "g_totalPlayTime", va( "%i", i ) );
+	trap_FS_Read(&i, sizeof(i), f);
+	if (i > g_totalPlayTime.integer) {
+		trap_Cvar_Set("g_totalPlayTime", va("%i", i));
 	}
 
-//----(SA)	had to add 'episode' tracking.
-	// this is only set in the map scripts, and was previously only handled in the menu's
-	// read the 'episode'
-	if ( ver >= 13 ) {
-		trap_FS_Read( &i, sizeof( i ), f );
-		trap_Cvar_Register( &episode, "g_episode", "0", CVAR_ROM );	// Knightmare added
-		trap_Cvar_Set( "g_episode", va( "%i", i ) );
+	//----(SA)	had to add 'episode' tracking.
+		// this is only set in the map scripts, and was previously only handled in the menu's
+		// read the 'episode'
+	if (ver >= 13) {
+		trap_FS_Read(&i, sizeof(i), f);
+		trap_Cvar_Register(&episode, "g_episode", "0", CVAR_ROM);
+		trap_Cvar_Set("g_episode", va("%i", i));
 	}
-//----(SA)	end
+	//----(SA)	end
 
-	// NOTE: do not change the above order without also changing the server code
+		// NOTE: do not change the above order without also changing the server code
 
-	// read the info string length
-	trap_FS_Read( &i, sizeof( i ), f );
+		// read the info string length
+	trap_FS_Read(&i, sizeof(i), f);
 
 	// read the info string
-	trap_FS_Read( infoString, i, f );
+	trap_FS_Read(infoString, i, f);
 
-	if ( ver >= SA_MOVEDSTUFF ) {
-		if ( ver > SA_ADDEDMUSIC ) {
+	if (ver >= SA_MOVEDSTUFF) {
+		if (ver > SA_ADDEDMUSIC) {
 			// read current time/date info
-			ReadTime( f, &tm );
+			ReadTime(f, &tm);
 
 			// read music
-			trap_FS_Read( musicString, MAX_QPATH, f );
+			trap_FS_Read(musicString, MAX_QPATH, f);
 
-			if ( strlen( musicString ) ) {
-				trap_Cvar_Register( &musicCvar, "s_currentMusic", "", CVAR_ROM ); // get current music
-				if ( Q_stricmp( musicString, musicCvar.string ) ) {      // it's different than what's playing, so fade out and queue up
+			if (strlen(musicString)) {
+				trap_Cvar_Register(&musicCvar, "s_currentMusic", "", CVAR_ROM); // get current music
+				if (Q_stricmp(musicString, musicCvar.string)) {      // it's different than what's playing, so fade out and queue up
 //					trap_SendServerCommand(-1, "mu_fade 0 1000\n");
 //					trap_SetConfigstring( CS_MUSIC_QUEUE, musicString);
-					trap_SendServerCommand( -1, va( "mu_start %s 1000\n", musicString ) );       // (SA) trying this instead
+					trap_SendServerCommand(-1, va("mu_start %s 1000\n", musicString));       // (SA) trying this instead
 				}
 			}
 
 		}
 
-//----(SA)	added
-		if ( ver >= SA_ADDEDFOG ) {
-			char *p;
+		//----(SA)	added
+		if (ver >= SA_ADDEDFOG) {
+			char* p;
 			int k;
 
 			// get length
-			trap_FS_Read( &i, sizeof( i ), f );
+			trap_FS_Read(&i, sizeof(i), f);
 			// get fog string
-			trap_FS_Read( infoString, i, f );
+			trap_FS_Read(infoString, i, f);
 			infoString[i] = 0;
 
 			// set the configstring so the 'savegame current' has good fog
 
-			if ( !Q_stricmp( infoString, "0" ) ) { // no fog
-				trap_Cvar_Set( "r_savegameFogColor", "none" );
-			} else {
+			if (!Q_stricmp(infoString, "0")) { // no fog
+				trap_Cvar_Set("r_savegameFogColor", "none");
+			}
+			else {
 
 				// send it off to get set on the client
-				for ( p = &infoString[0],k = 0; *p; p++ ) {
-					if ( *p == ' ' ) {
+				for (p = &infoString[0], k = 0; *p; p++) {
+					if (*p == ' ') {
 						k++;
 					}
-					if ( k == 6 ) {  // the last parameter
+					if (k == 6) {  // the last parameter
 						infoString[p - infoString + 1] = '0';
 						infoString[p - infoString + 2] = 0;
 						break;
 					}
 				}
-				trap_Cvar_Set( "r_savegameFogColor", infoString );
+				trap_Cvar_Set("r_savegameFogColor", infoString);
 			}
-
-			trap_SetConfigstring( CS_FOGVARS, infoString );
+			trap_SetConfigstring(CS_FOGVARS, infoString);
 		}
-//----(SA)	end
+		//----(SA)	end
 
-		if ( ver > 13 ) {
+		if (ver > 13) {
 			// read the game skill
-			trap_FS_Read( &i, sizeof( i ), f );
+			trap_FS_Read(&i, sizeof(i), f);
 			// set the skill level
-			trap_Cvar_Set( "g_gameskill", va( "%i",i ) );
+			trap_Cvar_Set("g_gameskill", va("%i", i));
 			// update this
 			aicast_skillscale = (float)i / (float)GSKILL_MAX;
 		}
 	}
-
-
-
 
 	// reset all AAS blocking entities
-	trap_AAS_SetAASBlockingEntity( vec3_origin, vec3_origin, -1 );
+	trap_AAS_SetAASBlockingEntity(vec3_origin, vec3_origin, -1);
 
-	// read the entity structures
-	trap_FS_Read( &i, sizeof( i ), f );
-	size = i;
-	last = 0;
-	while ( 1 )
-	{
-		trap_FS_Read( &i, sizeof( i ), f );
-		if ( i < 0 ) {
-			break;
-		}
-		if ( i >= MAX_GENTITIES ) {
-			trap_FS_FCloseFile( f );
-			G_Error( "G_LoadGame: entitynum out of range (%i, MAX = %i)\n", i, MAX_GENTITIES );
-		}
-		if ( i >= level.num_entities ) {  // notify server
-			level.num_entities = i;
-			serverEntityUpdate = qtrue;
-		}
-		ent = &g_entities[i];
-		ReadEntity( f, ent, size );
-		// free all entities that we skipped
-		for ( ; last < i; last++ ) {
-			if ( g_entities[last].inuse && i != ENTITYNUM_WORLD ) {
-				if ( last < MAX_CLIENTS ) {
-					trap_DropClient( last, "" );
-				} else {
-					G_FreeEntity( &g_entities[last] );
+	// Don't read in this stuff for mid-game cutscenes
+	if (!(!Q_stricmpn(mapstr, "cutscene6", 9) || !Q_stricmpn(mapstr, "cutscene9", 9) || !Q_stricmpn(mapstr, "cutscene11", 10) || !Q_stricmpn(mapstr, "cutscene14", 10))) {
+		// read the entity structures
+		trap_FS_Read(&i, sizeof(i), f);
+		size = i;
+		last = 0;
+		while (1)
+		{
+			trap_FS_Read(&i, sizeof(i), f);
+			if (i < 0) {
+				break;
+			}
+			if (i >= MAX_GENTITIES) {
+				trap_FS_FCloseFile(f);
+				G_Error("G_LoadGame: entitynum out of range (%i, MAX = %i)\n", i, MAX_GENTITIES);
+			}
+			if (i >= level.num_entities) {  // notify server
+				level.num_entities = i;
+				serverEntityUpdate = qtrue;
+			}
+			ent = &g_entities[i];
+			ReadEntity(f, ent, size);
+			// free all entities that we skipped
+			for (; last < i; last++) {
+				if (g_entities[last].inuse && i != ENTITYNUM_WORLD) {
+					if (last < MAX_CLIENTS) {
+						trap_DropClient(last, "");
+					}
+					else {
+						G_FreeEntity(&g_entities[last]);
+					}
 				}
 			}
+			last = i + 1;
 		}
-		last = i + 1;
+
+		// clear all remaining entities
+		for (ent = &g_entities[last]; last < MAX_GENTITIES; last++, ent++) {
+			memset(ent, 0, sizeof(*ent));
+			ent->classname = "freed";
+			ent->freetime = level.time;
+			ent->inuse = qfalse;
+		}
+
+		// read the client structures
+		trap_FS_Read(&i, sizeof(i), f);
+		size = i;
+		while (1)
+		{
+			trap_FS_Read(&i, sizeof(i), f);
+			if (i < 0) {
+				break;
+			}
+			if (i > MAX_CLIENTS) {
+				trap_FS_FCloseFile(f);
+				G_Error("G_LoadGame: clientnum out of range\n");
+			}
+			cl = &level.clients[i];
+			if (cl->pers.connected == CON_DISCONNECTED) {
+				trap_FS_FCloseFile(f);
+				G_Error("G_LoadGame: client mis-match in savegame");
+			}
+			ReadClient(f, cl, size);
+		}
+
+		// read the cast_state structures
+		trap_FS_Read(&i, sizeof(i), f);
+		size = i;
+		while (1)
+		{
+			trap_FS_Read(&i, sizeof(i), f);
+			if (i < 0) {
+				break;
+			}
+			if (i > MAX_CLIENTS) {
+				trap_FS_FCloseFile(f);
+				G_Error("G_LoadGame: clientnum out of range\n");
+			}
+			cs = &caststates[i];
+			ReadCastState(f, cs, size);
+		}
+
+		// inform server of entity count if it has increased
+		if (serverEntityUpdate) {
+			// let the server system know that there are more entities
+			trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t),
+				&level.clients[0].ps, sizeof(level.clients[0]));
+		}
+
 	}
 
-	// clear all remaining entities
-	for ( ent = &g_entities[last] ; last < MAX_GENTITIES ; last++, ent++ ) {
-		memset( ent, 0, sizeof( *ent ) );
-		ent->classname = "freed";
-		ent->freetime = level.time;
-		ent->inuse = qfalse;
-	}
-
-	// read the client structures
-	trap_FS_Read( &i, sizeof( i ), f );
-	size = i;
-	while ( 1 )
-	{
-		trap_FS_Read( &i, sizeof( i ), f );
-		if ( i < 0 ) {
-			break;
-		}
-		if ( i > MAX_CLIENTS ) {
-			trap_FS_FCloseFile( f );
-			G_Error( "G_LoadGame: clientnum out of range\n" );
-		}
-		cl = &level.clients[i];
-		if ( cl->pers.connected == CON_DISCONNECTED ) {
-			trap_FS_FCloseFile( f );
-			G_Error( "G_LoadGame: client mis-match in savegame" );
-		}
-		ReadClient( f, cl, size );
-	}
-
-	// read the cast_state structures
-	trap_FS_Read( &i, sizeof( i ), f );
-	size = i;
-	while ( 1 )
-	{
-		trap_FS_Read( &i, sizeof( i ), f );
-		if ( i < 0 ) {
-			break;
-		}
-		if ( i > MAX_CLIENTS ) {
-			trap_FS_FCloseFile( f );
-			G_Error( "G_LoadGame: clientnum out of range\n" );
-		}
-		cs = &caststates[i];
-		ReadCastState( f, cs, size );
-	}
-
-	// inform server of entity count if it has increased
-	if ( serverEntityUpdate ) {
-		// let the server system know that there are more entities
-		trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
-							 &level.clients[0].ps, sizeof( level.clients[0] ) );
-	}
-
-//----(SA)	moved these up in ver 15
-	if ( ver < SA_MOVEDSTUFF ) {
-		if ( ver > SA_ADDEDMUSIC ) {
+	//----(SA)	moved these up in ver 15
+	if (ver < SA_MOVEDSTUFF) {
+		if (ver > SA_ADDEDMUSIC) {
 			// read current time/date info
-			ReadTime( f, &tm );
+			ReadTime(f, &tm);
 
 			// read music
-			trap_FS_Read( musicString, MAX_QPATH, f );
+			trap_FS_Read(musicString, MAX_QPATH, f);
 
-			if ( strlen( musicString ) ) {
-				trap_Cvar_Register( &musicCvar, "s_currentMusic", "", CVAR_ROM ); // get current music
-				if ( Q_stricmp( musicString, musicCvar.string ) ) {      // it's different than what's playing, so fade out and queue up
-					trap_SendServerCommand( -1, "mu_fade 0 1000\n" );
-					trap_SetConfigstring( CS_MUSIC_QUEUE, musicString );
+			if (strlen(musicString)) {
+				trap_Cvar_Register(&musicCvar, "s_currentMusic", "", CVAR_ROM); // get current music
+				if (Q_stricmp(musicString, musicCvar.string)) {      // it's different than what's playing, so fade out and queue up
+					trap_SendServerCommand(-1, "mu_fade 0 1000\n");
+					trap_SetConfigstring(CS_MUSIC_QUEUE, musicString);
 				}
 			}
-
 		}
 
-		if ( ver > 13 ) {
+		if (ver > 13) {
 			// read the game skill
-			trap_FS_Read( &i, sizeof( i ), f );
+			trap_FS_Read(&i, sizeof(i), f);
 			// set the skill level
-			trap_Cvar_Set( "g_gameskill", va( "%i",i ) );
+			trap_Cvar_Set("g_gameskill", va("%i", i));
 			// update this
 			aicast_skillscale = (float)i / (float)GSKILL_MAX;
 		}
 	}
+	//----(SA)	end moved
 
-//----(SA)	end moved
-
-
-
-	trap_FS_FCloseFile( f );
+	trap_FS_FCloseFile(f);
 
 	// now increment the attempts field and update totalplaytime according to cvar
-	trap_Cvar_Update( &g_attempts );
-	trap_Cvar_Set( "g_attempts", va( "%i", g_attempts.integer + 1 ) );
+	trap_Cvar_Update(&g_attempts);
+	trap_Cvar_Set("g_attempts", va("%i", g_attempts.integer + 1));
 	caststates[0].attempts = g_attempts.integer + 1;
 	caststates[0].lastLoadTime = level.time;
-	if ( caststates[0].totalPlayTime < g_totalPlayTime.integer ) {
+	if (caststates[0].totalPlayTime < g_totalPlayTime.integer) {
 		caststates[0].totalPlayTime = g_totalPlayTime.integer;
 	}
 
 	level.lastLoadTime = leveltime;
 
-/*
-	// always save to the "current" savegame
-	last = level.time;
-	level.time = leveltime;	// use the value we just for the save time
-	G_SaveGame(NULL);
-	// additionally update the last game that was loaded
-	trap_Cvar_VariableStringBuffer( "savegame_filename", mapname, sizeof(mapname) );
-	if (strlen( mapname ) > 0 && !strstr( mapname, "autosave" )) {
-		// clear it out so we dont lose it after a map_restart
-		trap_Cvar_Set( "savegame_filename", "" );
-		if (strstr(mapname, ".svg")) mapname[strstr(mapname, ".svg") - mapname] = '\0';
-		if (strstr(mapname, "/")) {
-			G_SaveGame( strstr(mapname, "/") + 1 );
-		} else {
-			G_SaveGame( mapname );
+	/*
+		// always save to the "current" savegame
+		last = level.time;
+		level.time = leveltime;	// use the value we just for the save time
+		G_SaveGame(NULL);
+		// additionally update the last game that was loaded
+		trap_Cvar_VariableStringBuffer( "savegame_filename", mapname, sizeof(mapname) );
+		if (strlen( mapname ) > 0 && !strstr( mapname, "autosave" )) {
+			// clear it out so we dont lose it after a map_restart
+			trap_Cvar_Set( "savegame_filename", "" );
+			if (strstr(mapname, ".svg")) mapname[strstr(mapname, ".svg") - mapname] = '\0';
+			if (strstr(mapname, "/")) {
+				G_SaveGame( strstr(mapname, "/") + 1 );
+			} else {
+				G_SaveGame( mapname );
+			}
 		}
-	}
-	// restore the correct level.time
-	level.time = last;
-*/
+		// restore the correct level.time
+		level.time = last;
+	*/
 }
 
 //=========================================================
