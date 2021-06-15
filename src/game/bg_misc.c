@@ -4012,13 +4012,10 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 
 	case IT_ARMOR:
 		// we also clamp armor to the maxhealth for handicapping
-#if defined GAMEDLL || defined CGAMEDLL
-		if ( ps->stats[STAT_ARMOR] >= sk_max_armor.integer ) {	// Knightmare changed, use variable
-#else
-		if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
-#endif
+//			if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
+		if (ps->stats[STAT_ARMOR] >= 100) {
 			return qfalse;
-		}
+	}
 		return qtrue;
 
 	case IT_HEALTH:

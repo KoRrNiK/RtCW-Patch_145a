@@ -1247,7 +1247,7 @@ qboolean AICast_ScriptAction_SetArmor( cast_state_t *cs, char *params ) {
 		G_Error( "AI Scripting: setarmor requires an armor value" );
 	}
 
-	g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] += atoi( params );
+	g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] = atoi( params );
 
 	return qtrue;
 }
@@ -1283,6 +1283,11 @@ qboolean AICast_ScriptAction_GiveArmor( cast_state_t *cs, char *params ) {
 
 	if ( item->giType == IT_ARMOR ) {
 		g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] += item->quantity;
+		
+		if (g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] <= 0) {
+			g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] = 0;
+		}
+
 		if ( g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] > 100 ) {
 			g_entities[cs->entityNum].client->ps.stats[STAT_ARMOR] = 100;
 		}

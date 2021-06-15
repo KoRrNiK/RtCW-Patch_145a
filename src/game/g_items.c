@@ -570,8 +570,12 @@ int Pickup_Armor( gentity_t *ent, gentity_t *other ) {
 	other->client->ps.stats[STAT_ARMOR] += ent->item->quantity;
 //	if ( other->client->ps.stats[STAT_ARMOR] > other->client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
 //		other->client->ps.stats[STAT_ARMOR] = other->client->ps.stats[STAT_MAX_HEALTH] * 2;
-	if ( other->client->ps.stats[STAT_ARMOR] > sk_max_armor.integer ) {	// Knightmare changed, use variable
+	/*if ( other->client->ps.stats[STAT_ARMOR] > sk_max_armor.integer ) {	// Knightmare changed, use variable
 		other->client->ps.stats[STAT_ARMOR] = sk_max_armor.integer;
+	}*/
+
+	if (other->client->ps.stats[STAT_ARMOR] > 100) {
+		other->client->ps.stats[STAT_ARMOR] = 100;
 	}
 
 	// single player has no respawns	(SA)
@@ -606,9 +610,14 @@ void RespawnItem( gentity_t *ent ) {
 
 		choice = rand() % count;
 
-		for ( count = 0, ent = master; count < choice; ent = ent->teamchain, count++ )
+		for (count = 0, ent = master; ent && count < choice; ent = ent->teamchain, count++)
 			;
 	}
+
+	if (!ent) {
+		return;
+	}
+
 
 	ent->r.contents = CONTENTS_TRIGGER;
 	//ent->s.eFlags &= ~EF_NODRAW;
