@@ -627,6 +627,8 @@ int CheckArmor( gentity_t *ent, int damage, int dflags ) {
 
 	client->ps.stats[STAT_ARMOR] -= save;
 
+	if (client->ps.stats[STAT_ARMOR] < 0) client->ps.stats[STAT_ARMOR] = 0;
+
 	return save;
 }
 
@@ -934,6 +936,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( ( g_gametype.integer == GT_SINGLE_PLAYER ) && !( targ->r.svFlags & SVF_CASTAI ) ) { // the player
 		switch ( mod )
 		{
+
 		case MOD_GRENADE:
 		case MOD_GRENADE_SPLASH:
 		case MOD_ROCKET:
@@ -1370,6 +1373,8 @@ Returns qtrue if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
+
+/*
 qboolean CanDamage( gentity_t *targ, vec3_t origin ) {
 	vec3_t dest;
 	trace_t tr;
@@ -1429,7 +1434,108 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin ) {
 
 	return qfalse;
 }
+*/
+qboolean CanDamage(gentity_t* targ, vec3_t origin) {
+	vec3_t dest;
+	trace_t tr;
+	vec3_t midpoint;
+	vec3_t	offsetmins = { -15, -15, -15 };
+	vec3_t	offsetmaxs = { 15, 15, 15 };
 
+	VectorAdd(targ->r.absmin, targ->r.absmax, midpoint);
+	VectorScale(midpoint, 0.5, midpoint);
+
+	VectorCopy(midpoint, dest);
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0) {
+		return qtrue;
+	}
+
+
+
+	if (&g_entities[tr.entityNum] == targ) {
+		return qtrue;
+	}
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0) {
+		return qtrue;
+	}
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0) {
+		return qtrue;
+	}
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmaxs[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0) {
+		return qtrue;
+	}
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0) {
+		return qtrue;
+	}
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmaxs[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmaxs[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	VectorCopy(midpoint, dest);
+	dest[0] += offsetmins[0];
+	dest[1] += offsetmins[1];
+	dest[2] += offsetmins[2];
+	trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+
+	if (tr.fraction == 1.0)
+		return qtrue;
+
+	return qfalse;
+}
 
 /*
 ============
