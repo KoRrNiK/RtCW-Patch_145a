@@ -376,6 +376,8 @@ void    G_TouchTriggers( gentity_t *ent ) {
 SpectatorThink
 =================
 */
+
+/*
 void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	pmove_t pm;
 	gclient_t   *client;
@@ -430,8 +432,72 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		Cmd_FollowCycle_f( ent, 1 );
 	}
 }
+*/
+void SpectatorThink(gentity_t* ent, usercmd_t* ucmd) {
+	pmove_t pm;
+	gclient_t* client;
+
+	client = ent->client;
+
+	if (client->sess.spectatorState != SPECTATOR_FOLLOW || !(client->ps.pm_flags & PMF_FOLLOW)) {
+		if (client->sess.spectatorState == SPECTATOR_FREE) {
+			if (client->noclip) {
+				client->ps.pm_type = PM_NOCLIP;
+			}
+			else {
+				client->ps.pm_type = PM_SPECTATOR;
+			}
+		}
+		else {
+			client->ps.pm_type = PM_FREEZE;
+		}
+
+		client->ps.speed = 400; // faster than normal
+		if (client->ps.sprintExertTime) {
+			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
 
 
+		}
+		// set up for pmove
+		memset(&pm, 0, sizeof(pm));
+		pm.ps = &client->ps;
+		pm.cmd = *ucmd;
+		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;   // spectators can fly through bodies
+		pm.trace = trap_Trace;
+		pm.pointcontents = trap_PointContents;
+
+		Pmove(&pm); // JPW NERVE
+
+		// Rafael - Activate
+		// Ridah, made it a latched event (occurs on keydown only)
+		if (client->latched_buttons & BUTTON_ACTIVATE) {
+			Cmd_Activate_f(ent);
+		}
+
+		// save results of pmove
+		VectorCopy(client->ps.origin, ent->s.origin);
+
+		G_TouchTriggers(ent);
+		trap_UnlinkEntity(ent);
+	}
+
+	if (ent->flags & FL_NOFATIGUE) {
+		ent->client->ps.sprintTime = 20000;
+	}
+
+
+	client->oldbuttons = client->buttons;
+	client->buttons = ucmd->buttons;
+
+	//----(SA)	added
+	client->oldwbuttons = client->wbuttons;
+	client->wbuttons = ucmd->wbuttons;
+
+	// attack button cycles through spectators
+	if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK)) {
+		Cmd_FollowCycle_f(ent, 1);
+	}
+}
 
 /*
 =================
@@ -529,7 +595,10 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 		}
 // jpw
 		// count down armor when over max
-		if ( sk_rot_armor.value && client->ps.stats[STAT_ARMOR] > client->ps.stats[STAT_MAX_HEALTH] ) {	// Knightmare- added option
+		/*if ( sk_rot_armor.value && client->ps.stats[STAT_ARMOR] > client->ps.stats[STAT_MAX_HEALTH] ) {	// Knightmare- added option
+			client->ps.stats[STAT_ARMOR]--;
+		}*/
+		if (client->ps.stats[STAT_ARMOR] > 100) {
 			client->ps.stats[STAT_ARMOR]--;
 		}
 	}
@@ -608,7 +677,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 
 //----(SA)	FIXME: TODO:  hmm, going through here adding surfaceparms it seems that the value for ent->client->ps.pm_time was weird.  (1000 for all but dmg_25 which has 250?)
 			if ( event == EV_FALL_NDIE ) {
-				damage = (ent->client->ps.stats[STAT_HEALTH]) + (ent->client->ps.stats[STAT_ARMOR]);
+				damage = 9999;
 			} else if ( event == EV_FALL_DMG_50 ) {
 				damage = 50;
 				stunTime = 1000;
@@ -1536,14 +1605,18 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 // jpw
 //				ent->client->ps.eFlags = flags;
 				return;
-			} else {
-				// drop them to free spectators unless they are dedicated camera followers
-				if ( ent->client->sess.spectatorClient >= 0 ) {
-					ent->client->sess.spectatorState = SPECTATOR_FREE;
-					ClientBegin( ent->client - level.clients );
-				}
 			}
 		}
+
+		if (ent->client->ps.pm_flags & PMF_FOLLOW) {
+			// drop them to free spectators unless they are dedicated camera followers
+			if (ent->client->sess.spectatorClient >= 0) {
+				ent->client->sess.spectatorState = SPECTATOR_FREE;
+			}
+
+			ClientBegin(ent->client - level.clients);
+		}
+
 	}
 
 	if ( ent->client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
