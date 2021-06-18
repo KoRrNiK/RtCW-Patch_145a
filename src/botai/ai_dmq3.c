@@ -1455,6 +1455,11 @@ int BotFindEnemy( bot_state_t *bs, int curenemy ) {
 		if ( i == curenemy ) {
 			continue;
 		}
+
+		if (g_entities[i].flags & FL_NOTARGET) {
+			continue;
+		}
+
 		//
 		BotEntityInfo( i, &entinfo );
 		//
