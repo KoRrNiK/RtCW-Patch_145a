@@ -6884,6 +6884,11 @@ void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
 			return;
 
 		case UIMENU_INGAME:
+
+			if (trap_Cvar_VariableValue("savegame_loading")) {
+				return;
+			}
+
 			trap_Cvar_Set( "cl_paused", "1" );
 			trap_Key_SetCatcher( KEYCATCH_UI );
 			UI_BuildPlayerList();
