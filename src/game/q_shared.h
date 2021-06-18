@@ -32,13 +32,21 @@ If you have questions concerning this license or the applicable additional terms
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#define Q3_VERSION      "Wolf 1.1 S-R"	// Knightmare- was 1.41 // new SPEEDRUN VERSION
+//#define Q3_VERSION      "Wolf 1.2 S-R"	// Knightmare- was 1.41 // new SPEEDRUN VERSION
 // ver 1.0.0	- release
 // ver 1.0.1	- post-release work
 // ver 1.1.0	- patch 1 (12/12/01)
 // ver 1.1b		- TTimo SP linux release (+ MP update)
 // ver 1.2.b5	- Mac code merge in
 // ver 1.3		- patch 2 (02/13/02)
+
+
+#define PRODUCT_NAME	"RTCW"
+#define PRODUCT_VERSION "1.45a"
+#define PRODUCT_DATE __DATE__
+
+
+#define Q3_VERSION PRODUCT_NAME " " PRODUCT_VERSION
 
 #define NEW_ANIMS
 #define MAX_TEAMNAME    32
