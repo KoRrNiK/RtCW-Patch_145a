@@ -78,6 +78,7 @@ qboolean AICast_StateChange( cast_state_t *cs, aistateEnum_t newaistate ) {
 
 	// if moving from query mode, kill the anim and pausetime
 	if ( oldstate == AISTATE_QUERY ) {
+
 		// stop playing the animation
 		ent->client->ps.torsoTimer = 0;
 		ent->client->ps.legsTimer = 0;
@@ -164,6 +165,8 @@ int AICast_ScanForEnemies( cast_state_t *cs, int *enemies ) {
 	int best, oldEnemy, oldPauseTime;
 	cast_state_t *ocs;
 
+
+
 	if ( cs->castScriptStatus.scriptAttackEnt >= 0 ) {
 		if ( g_entities[cs->castScriptStatus.scriptAttackEnt].health <= 0 ) {
 			cs->castScriptStatus.scriptAttackEnt = -1;
@@ -210,6 +213,7 @@ int AICast_ScanForEnemies( cast_state_t *cs, int *enemies ) {
 						enemyCount++;
 						queryCount = 0;
 						friendlyAlertCount = 0;
+
 					} else if ( !enemyCount && ( g_entities[i].health > 0 ) && AICast_QueryEnemy( cs, i ) && ( cs->vislist[i].flags & AIVIS_PROCESS_SIGHTING ) ) {
 						enemies[queryCount] = i;
 						queryCount++;
@@ -270,6 +274,8 @@ int AICast_ScanForEnemies( cast_state_t *cs, int *enemies ) {
 	}
 	memcpy( enemies, sortedEnemies, sizeof( int ) * enemyCount );
 
+
+
 	// if we are not in combat mode, then an enemy should trigger a state change straight to combat mode
 	if ( !queryCount && !friendlyAlertCount && enemyCount && cs->aiState < AISTATE_COMBAT ) {
 		// face them while making the transition
@@ -283,19 +289,69 @@ int AICast_ScanForEnemies( cast_state_t *cs, int *enemies ) {
 		cs->enemyNum = oldEnemy;
 	}
 
+
+
 	// if we are in relaxed state, and we see a query enemy, then go into query mode
+
+
 	if ( queryCount ) {
-		if ( cs->aiState == AISTATE_RELAXED ) {
+		if ( cs->aiState == AISTATE_RELAXED) {
 			// go into query mode
-			if ( AICast_StateChange( cs, AISTATE_QUERY ) ) {
-				cs->enemyNum = enemies[0];  // lock onto the closest potential enemy
+		
+	
+			if ( AICast_StateChange( cs, AISTATE_QUERY )) {
+
+				/*if (!AICast_QueryEnemy(cs, cs->enemyNum)) {
+					AICast_StateChange(cs, AISTATE_RELAXED);
+
+					return -1;
+				}*/
+				/*gentity_t* ent;
+				ent = &g_entities[cs->entityNum];
+
+				if (g_entities[cs->enemyNum].health <= 0) {
+					AICast_StateChange(cs, AISTATE_RELAXED);
+					
+					ent->client->ps.torsoTimer = 0;
+					ent->client->ps.legsTimer = 0;
+					cs->pauseTime = 0;
+
+					return -1;
+		
+				} 
+				*/
+
+				/*if (g_entities[enemies[0]].health <= 0 && enemies[0] == 0) {
+					AICast_StateChange(cs, AISTATE_RELAXED);
+
+					Com_Printf("1:  %d | %d\n", cs->enemyNum, enemies[0]);
+					return -1;
+
+				}*/
+
+				
+				
+			/*	if (cs->enemyNum >= 0 && !g_entities[cs->enemyNum].inuse && !g_entities[cs->enemyNum].client && g_entities[cs->enemyNum].health <= 0) {
+					Com_Printf("1:  %d | %d\n", cs->enemyNum, enemies[0]);
+					cs->enemyNum = -1;
+					AICast_StateChange(cs, AISTATE_RELAXED);
+					return -1;
+				}
+			*/	
+				cs->enemyNum = enemies[0];
+				//Com_Printf("2:  %d | %d\n", cs->enemyNum, enemies[0]);
+
 				return -1;
+
 			}
 			return 0;   // scripting obviously doesn't want us to progress from relaxed just yet
 		}
 		// else ignore the query mode, since we are already above relaxed mode
 		return 0;
 	}
+
+
+
 	if ( friendlyAlertCount ) {
 		// call a script event
 		oldPauseTime = cs->scriptPauseTime;

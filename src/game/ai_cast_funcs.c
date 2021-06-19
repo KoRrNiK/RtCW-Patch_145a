@@ -489,6 +489,8 @@ char *AIFunc_Idle( cast_state_t *cs ) {
 	}
 	//
 	// look for things we should attack
+
+
 	numEnemies = AICast_ScanForEnemies( cs, enemies );
 	if ( numEnemies == -1 ) {     // query mode
 		return NULL;
@@ -842,6 +844,8 @@ char *AIFunc_InspectFriendly( cast_state_t *cs ) {
 		int numEnemies;
 		//
 		// look for things we should attack
+
+
 		numEnemies = AICast_ScanForEnemies( cs, enemies );
 		if ( numEnemies == -1 ) { // query mode
 			return NULL;
@@ -1325,6 +1329,7 @@ char *AIFunc_InspectAudibleEvent( cast_state_t *cs ) {
 		int numEnemies;
 		//
 		// look for things we should attack
+
 		numEnemies = AICast_ScanForEnemies( cs, enemies );
 		if ( numEnemies == -1 ) { // query mode
 			return NULL;
@@ -1587,6 +1592,8 @@ char *AIFunc_ChaseGoal( cast_state_t *cs ) {
 		return AIFunc_IdleStart( cs );
 	}
 
+
+
 	// CHECK: will this mess with scripting?
 	//
 	// do we need to avoid a danger?
@@ -1754,6 +1761,8 @@ char *AIFunc_ChaseGoal( cast_state_t *cs ) {
 		cs->movestateType = MSTYPE_TEMPORARY;
 	}
 
+
+
 	// if we have an enemy, fire if they're visible
 	if ( cs->enemyNum >= 0 ) { //attack the enemy if possible
 		AICast_ProcessAttack( cs );
@@ -1761,8 +1770,11 @@ char *AIFunc_ChaseGoal( cast_state_t *cs ) {
 		int numEnemies;
 		//
 		// look for things we should attack
+
+
 		numEnemies = AICast_ScanForEnemies( cs, enemies );
-		if ( numEnemies == -1 ) { // query mode
+
+		if ( numEnemies == -1) { // query mode
 			return NULL;
 		} else if ( numEnemies == -2 )     { // inspection may be required
 			char *retval;
@@ -2182,6 +2194,7 @@ char *AIFunc_BattleHunt( cast_state_t *cs ) {
 
 		ammo = cs->bs->cur_ps.ammo;
 		shouldAttack = qfalse;
+
 		numEnemies = AICast_ScanForEnemies( cs, enemies );
 		if ( numEnemies == -1 ) { // query mode
 			return NULL;
@@ -2758,6 +2771,7 @@ char *AIFunc_BattleChase( cast_state_t *cs ) {
 	}
 	//
 	// is there someone else we can go for instead?
+
 	numEnemies = AICast_ScanForEnemies( cs, enemies );
 	if ( numEnemies == -1 ) { // query mode
 		return NULL;
@@ -3368,6 +3382,7 @@ char *AIFunc_BattleTakeCover( cast_state_t *cs ) {
 	// if we are out of ammo, we shouldn't bother trying to attack (and we should keep hiding)
 	ammo = cs->bs->cur_ps.ammo;
 	shouldAttack = qfalse;
+
 	numEnemies = AICast_ScanForEnemies( cs, enemies );
 	if ( numEnemies == -1 ) { // query mode
 		return NULL;
@@ -3838,6 +3853,7 @@ char *AIFunc_GrenadeFlush( cast_state_t *cs ) {
 	}
 
 	// is there someone else we can go for instead?
+
 	numEnemies = AICast_ScanForEnemies( cs, enemies );
 	if ( numEnemies == -1 ) { // query mode
 		return NULL;
@@ -3874,7 +3890,7 @@ char *AIFunc_GrenadeFlush( cast_state_t *cs ) {
 		//
 		if ( followent->client && followent->health <= 0 ) {
 			cs->enemyNum = -1;
-			//G_Printf("aborting, enemy dead\n");
+		//	G_Printf("aborting, enemy dead\n");
 			return AIFunc_DefaultStart( cs );
 		}
 		//
@@ -4226,8 +4242,13 @@ char *AIFunc_InspectBody( cast_state_t *cs ) {
 	if ( cs->enemyNum < 0 ) {
 		return AIFunc_IdleStart( cs );
 	}
+
+
+
 	//
 	// look for things we should attack
+
+
 	numEnemies = AICast_ScanForEnemies( cs, enemies );
 	if ( numEnemies == -1 ) { // query mode
 		return NULL;
@@ -4566,6 +4587,7 @@ char *AIFunc_GrenadeKick( cast_state_t *cs ) {
 	shouldAttack = qfalse;
 	numEnemies = 0;
 	if ( AICast_GotEnoughAmmoForWeapon( cs, cs->weaponNum ) ) {
+
 		numEnemies = AICast_ScanForEnemies( cs, enemies );
 		if ( numEnemies == -1 ) { // query mode
 			return NULL;

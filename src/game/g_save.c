@@ -1235,7 +1235,7 @@ qboolean G_SaveGame( char *username ) {
 					 ( ( playtime / 1000 ) % 60 ) ),
 				 healthstr,
 				 g_entities[0].health, 
-				 g_gameskill.integer == 0 ? "Don't hurt me." : g_gameskill.integer == 1 ? "Bring 'em on!" : "I am Death incarnate!");
+				 g_gameskill.integer == 1 ? "Don't hurt me." : g_gameskill.integer == 2 ? "Bring 'em on!" : "I am Death incarnate!");
 	// write it out
 	// length
 	i = strlen( infoString );
