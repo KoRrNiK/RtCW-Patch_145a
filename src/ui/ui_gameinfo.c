@@ -139,39 +139,52 @@ static void UI_LoadArenasFromFile( char *filename ) {
 UI_LoadArenas
 ===============
 */
-void UI_LoadArenas( void ) {
+void UI_LoadArenas(void) {
 	int numdirs;
 	vmCvar_t arenasFile;
 	char filename[128];
 	char dirlist[1024];
-	char*       dirptr;
-	int i, n;
+	char* dirptr;
+	int i;
 	int dirlen;
-	char        *type;
+	char* type;
 
 	ui_numArenas = 0;
 	uiInfo.mapCount = 0;
 
-	trap_Cvar_Register( &arenasFile, "g_arenasFile", "", CVAR_INIT | CVAR_ROM );
-	if ( *arenasFile.string ) {
-		UI_LoadArenasFromFile( arenasFile.string );
-	} else {
-		UI_LoadArenasFromFile( "scripts/arenas.txt" );
+	trap_Cvar_Register(&arenasFile, "g_arenasFile", "", CVAR_INIT | CVAR_ROM);
+	if (*arenasFile.string) {
+		UI_LoadArenasFromFile(arenasFile.string);
+	}
+	else {
+		UI_LoadArenasFromFile("scripts/arenas.txt");
 	}
 
 	// get all arenas from .arena files
-	numdirs = trap_FS_GetFileList( "scripts", ".arena", dirlist, 1024 );
-	dirptr  = dirlist;
-	for ( i = 0; i < numdirs; i++, dirptr += dirlen + 1 ) {
-		dirlen = strlen( dirptr );
-		strcpy( filename, "scripts/" );
-		strcat( filename, dirptr );
-		UI_LoadArenasFromFile( filename );
+	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024);
+	dirptr = dirlist;
+	for (i = 0; i < numdirs; i++, dirptr += dirlen + 1) {
+		dirlen = strlen(dirptr);
+		strcpy(filename, "scripts/");
+		strcat(filename, dirptr);
+		UI_LoadArenasFromFile(filename);
 	}
-	trap_Print( va( "%i arenas parsed\n", ui_numArenas ) );
-	if ( UI_OutOfMemory() ) {
-		trap_Print( S_COLOR_YELLOW "WARNING: not anough memory in pool to load all arenas\n" );
+	trap_Print(va("%i arenas parsed\n", ui_numArenas));
+	if (UI_OutOfMemory()) {
+		trap_Print(S_COLOR_YELLOW "WARNING: not anough memory in pool to load all arenas\n");
 	}
+}
+/*
+===============
+UI_LoadArenasIntoMapList
+===============
+*/
+void UI_LoadArenasIntoMapList(void) {
+
+	int			n;
+	char* type;
+
+	uiInfo.mapCount = 0;
 
 	for ( n = 0; n < ui_numArenas; n++ ) {
 		// determine type

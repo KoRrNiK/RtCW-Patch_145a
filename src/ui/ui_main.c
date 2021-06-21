@@ -965,7 +965,7 @@ void Font_Report() {
 	}
 }
 
-void UI_Report() {
+void UI_Report(void) {
 	String_Report();
 	//Font_Report();
 
@@ -1145,12 +1145,12 @@ static void UI_LoadTranslationStrings( void ) {
 }
 
 
-void UI_Load() {
+void UI_Load( void ) {
 	char lastName[1024];
 	menuDef_t *menu = Menu_GetFocused();
 	char *menuSet = UI_Cvar_VariableString( "ui_menuFiles" );
 	if ( menu && menu->window.name ) {
-		strcpy( lastName, menu->window.name );
+		Q_strncpyz(lastName, menu->window.name, sizeof(lastName));
 	}
 	if ( menuSet == NULL || menuSet[0] == '\0' ) {
 #ifdef WOLF_SP_DEMO
@@ -2473,7 +2473,7 @@ static void UI_DrawGLInfo( rectDef_t *rect, int font, float scale, vec4_t color,
 	eptr = buff;
 	y = rect->y + 45;
 	numLines = 0;
-	while ( y < rect->y + rect->h && *eptr )
+	while (y < rect->y + rect->h && *eptr && numLines < 62)
 	{
 		while ( *eptr && *eptr == ' ' )
 			*eptr++ = '\0';
@@ -4588,7 +4588,8 @@ static void UI_RunMenuScript( char **args ) {
 			}
 			//#ifdef MISSIONPACK			// NERVE - SMF - enabled for multiplayer
 		} else if ( Q_stricmp( name, "loadArenas" ) == 0 ) {
-			UI_LoadArenas();
+			//UI_LoadArenas();
+			UI_LoadArenasIntoMapList();
 			UI_MapCountByGameType( qfalse );
 			Menu_SetFeederSelection( NULL, FEEDER_ALLMAPS, 0, "createserver" );
 			//#endif	// #ifdef MISSIONPACK
@@ -6651,6 +6652,8 @@ void _UI_Init( qboolean inGameLoad ) {
 	uiInfo.characterCount = 0;
 	uiInfo.aliasCount = 0;
 
+	UI_LoadArenas();
+
 //	UI_ParseTeamInfo("teaminfo.txt");
 //	UI_LoadTeams();
 //	UI_ParseGameInfo("gameinfo.txt");
@@ -6856,7 +6859,7 @@ void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
 			trap_Cvar_Set( "g_reloading", "0" );
 
 			trap_Key_SetCatcher( KEYCATCH_UI );
-			Menus_ActivateByName( "credit" );
+			Menus_ActivateByName( "main" );
 			return;
 //----(SA)	end
 

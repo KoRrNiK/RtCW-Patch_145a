@@ -144,7 +144,8 @@ extern vmCvar_t ui_serverStatusTimeOut;
 
 #define MAX_MENUDEPTH           8
 //#define MAX_MENUITEMS			128
-#define MAX_MENUITEMS           256
+//#define MAX_MENUITEMS           256
+#define MAX_MENUITEMS           1024
 
 #define MTYPE_NULL              0
 #define MTYPE_SLIDER            1
@@ -370,8 +371,8 @@ extern sfxHandle_t  MenuField_Key( menufield_s* m, int* key );
 //
 // ui_main.c
 //
-void            UI_Report();
-void            UI_Load();
+void			UI_Report(void);// UI_Report();
+void			UI_Load(void);// UI_Load();
 void            UI_LoadMenus( const char *menuFile, qboolean reset );
 void            _UI_SetActiveMenu( uiMenuCommand_t menu );
 uiMenuCommand_t _UI_GetActiveMenu( void );
@@ -379,6 +380,7 @@ int             UI_AdjustTimeByGame( int time );
 void            UI_ShowPostGame( qboolean newHigh );
 void            UI_ClearScores();
 void            UI_LoadArenas( void );
+void			UI_LoadArenasIntoMapList(void);
 
 //
 // ui_menu.c
