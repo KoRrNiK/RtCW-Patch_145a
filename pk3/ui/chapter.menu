@@ -1,0 +1,470 @@
+
+#include "ui/menudef.h"
+
+
+{
+
+menuDef {
+	name "chapter_menu"
+	visible 0
+	fullscreen 1
+	rect 186 0 454 480
+	background "menu_start"
+	focusColor .9 .9 .9 1
+	style 1
+	border 1
+	soundloop ""
+	
+	
+	onOpen {
+		setitemcolor fadebox backcolor 0 0 0 1 ; 
+		close play_menu;
+		fadeout fadebox ;
+		hide back_alt ;
+		show back ;
+		hide grpmessage;
+		
+		show "textSelectChapter";
+		show "rtcw_chapters";
+		
+		
+	}
+	onEsc {
+		close chapter_menu;
+		open main
+	}
+	
+	itemDef {
+		name mappreview
+		style WINDOW_STYLE_CINEMATIC
+		cinematic "menu2.roq"
+		rect 0 80 640 400
+		backcolor 1 1 1 .25
+		border 1
+		bordersize 1
+		bordercolor .1 .1 .1 1
+		decoration
+		visible 1
+	}
+
+//////////////// new wolf
+
+	itemDef {
+		name menu_select					// menu_select
+		style WINDOW_STYLE_SHADER
+		rect 0 0 640 480
+//		scralign stretch
+		background "menu_select"
+		visible MENU_TRUE
+		decoration
+		}
+
+
+
+
+	itemDef {
+		name band2					// band2
+		style WINDOW_STYLE_SHADER
+		rect 360 20 128 640
+		scralign stretch
+		background "band2"
+		visible MENU_TRUE
+		decoration
+		}
+
+
+	itemDef {
+		name bands					// bands
+		style WINDOW_STYLE_SHADER
+		rect 0 -480 640 1024
+		scralign stretch
+		background "bands"
+		visible MENU_TRUE
+		decoration
+		}
+
+
+itemDef {
+		name BLACKGRAD					// BLACKGRAD
+		style WINDOW_STYLE_SHADER
+		rect 0 -4 640 132
+		scralign topStretch
+		background "BLACKGRAD"
+		visible MENU_TRUE
+		decoration
+		}
+
+itemDef {
+		name BLACKGRAD2					// BLACKGRAD
+		style WINDOW_STYLE_SHADER
+		rect 0 420 640 -128
+		scralign bottomStretch
+		background "BLACKGRAD"
+		visible MENU_TRUE
+		decoration
+		}
+
+
+itemDef {
+		name FLAME					// FLAME
+		style WINDOW_STYLE_SHADER
+		rect 210 20 220 67
+		background "fLAME"
+		visible MENU_TRUE
+		decoration
+		}
+
+itemDef {
+		name WOLFFLAMELOGO					// WOLFFLAMELOGO
+		style WINDOW_STYLE_SHADER
+		rect 200 -5 240 120
+		background "WOLFFLAMELOGO"
+		visible MENU_TRUE
+		decoration
+		}
+
+itemDef {
+		name gold_line					// gold_line
+		style WINDOW_STYLE_SHADER
+		rect 0 76 226 10
+//		rect -256 76 482 10
+		scralign stretchLeftCenter	// top	// topStretch
+		background "gold_line"
+		visible MENU_TRUE
+		decoration
+		}
+
+itemDef {
+		name gold_line					// gold_line
+		style WINDOW_STYLE_SHADER
+//		rect 414 76 230 10
+//		rect 414 76 486 10
+		rect 414 76 226 10
+		scralign stretchRightCenter	// top	// topStretch
+		background "gold_line"
+		visible MENU_TRUE
+		decoration
+		}
+
+	itemDef {
+		name WOLFICONBACK					// WOLFICONBACK
+		style WINDOW_STYLE_SHADER
+		rect 140 200 360 190
+		background "WOLFICONBACK"
+		visible MENU_TRUE
+		decoration
+		}
+
+
+//////// 
+	
+	
+	
+	
+	
+	
+	// Control	//
+	
+
+	itemDef {
+		name textSelectChapter
+		text "SELECT A CHAPTER"
+		group rtcw_chapters
+		type 1
+		text "SELECT A CHAPTER"
+ 		rect 310 90 200 20 
+      	textalign 1
+      	textalignx 10
+      	textaligny 32
+		textscale .25
+		textfont UI_FONT_NORMAL
+		textstyle ITEM_TEXTSTYLE_SHADOWED
+		style WINDOW_STYLE_FILLED
+		backcolor 0 0 0 0       
+      	forecolor 1 1 1 1
+      	visible 1
+		decoration
+		
+	}
+	
+	
+	
+	
+	itemDef {
+		group rtcw_chapters
+		name chapter1
+		text "Ominous Rumors, Dark Secret"
+		textscale .24
+		style 0	
+		type 1
+		textstyle 6
+		rect 150 140 325 20 
+		textalign 0	 
+		textalignx 60  	
+		textaligny 16        
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 1 .9
+		visible 1 
+	
+		action {
+			play "sound/filter.wav";	
+			exec "spmap cutscene1"
+		}
+		
+		mouseenter { show message_controls }
+		mouseexit { hide message_controls }
+		
+
+
+	}
+	itemDef {
+		group rtcw_chapters
+		name chapter2
+		text "Weapons of Vengeance"
+		textscale .24
+		style 0	
+		type 1
+		textstyle 6
+		rect 150 180 325 20 
+		textalign 0	 
+		textalignx 60  	
+		textaligny 16        
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 1 .9
+		visible 1 
+	
+		
+		action {
+		
+			play "sound/filter.wav";	
+			exec "spmap cutscene6"
+		}
+
+		mouseenter { show message_controls }
+		mouseexit { hide message_controls }
+		
+	}
+	
+	itemDef {
+		group rtcw_chapters
+		name chapter3
+		text "Deadly Designs"
+		textscale .24
+		style 0	
+		type 1
+		textstyle 6
+		rect 150 220 325 20 
+		textalign 0	 
+		textalignx 60  	
+		textaligny 16        
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 1 .9
+		visible 1 
+	
+		
+		action {
+		
+			play "sound/filter.wav";	
+			exec "spmap cutscene9"
+		}
+		
+		mouseenter { show message_controls }
+		mouseexit { hide message_controls }
+
+	}
+	
+	itemDef {
+		group rtcw_chapters
+		name chapter4
+		text "Deathshead's Playground"
+		textscale .24
+		style 0	
+		type 1
+		textstyle 6
+		rect 150 260 325 20 
+		textalign 0	 
+		textalignx 60  	
+		textaligny 16        
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 1 .9
+		visible 1 
+	
+		
+		action {
+		
+			play "sound/filter.wav";	
+			exec "spmap cutscene11"
+		}
+		
+		mouseenter { show message_controls }
+		mouseexit { hide message_controls }
+		
+	}
+	
+	itemDef {
+		group rtcw_chapters
+		name chapter5
+		text "Re. Engagement, Op. Resurrection"
+		textscale .24
+		style 0	
+		type 1
+		textstyle 6
+		rect 150 300 325 20 
+		textalign 0	 
+		textalignx 60  	
+		textaligny 16        
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 1 .9
+		visible 1 
+	
+		
+		action {
+		
+			play "sound/filter.wav";	
+			exec "spmap cutscene14"
+		}
+		
+		mouseenter { show message_controls }
+		mouseexit { hide message_controls }
+
+	}
+	
+	itemDef {
+		group rtcw_chapters
+		name difficulty	
+		type ITEM_TYPE_SLIDER
+		text "Difficulty:"
+		cvarfloat "g_gameskill" 3 1 3
+ 		rect 160 350 300 20 
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 142
+      	textaligny 10
+		textscale .25
+		textfont UI_FONT_NORMAL
+		textstyle ITEM_TEXTSTYLE_SHADOWED
+		style WINDOW_STYLE_FILLED
+		backcolor 0 0 0 0       
+      	forecolor 1 1 1 1
+      	visible 1
+		decoration
+   	}
+	
+	itemDef {
+		group rtcw_chapters
+		name difficulty2
+		text ""
+		type ITEM_TYPE_MULTI	
+		cvar "g_gameskill"
+		cvarFloatList {"Don't hurt me." 1 "Bring'em on!" 2 "I am Death incarnate!" 3}
+ 		rect 160 355 300 20 
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 142
+		textaligny 27
+		textscale .25
+		textfont UI_FONT_NORMAL
+		textstyle ITEM_TEXTSTYLE_SHADOWED
+		style WINDOW_STYLE_FILLED
+		backcolor 0 0 0 0
+		forecolor 1 1 1 1
+		visible 1
+		action { play "sound/filter.wav" }
+		mouseEnter { } 
+		mouseExit { } 
+    }
+	
+	
+	// BACK BAR	//
+	
+	
+	itemDef {
+		name gotobar
+		style 2
+		rect 0 445 640 20 
+		textscale 0.4
+		textalign 0		// center
+		textalignx 60        	// x alignment point for text
+		// use it to offset left/right text from the edge 
+		// or to center the text on a different point
+		textaligny 21        
+		style 2
+		border 4
+		bordercolor 0.5 0.5 0.5 0.0
+		bordersize 2
+		backcolor 0.5 0.5 .5 0.0
+		visible 1 
+		mouseEnter { setcolor backcolor .5 0.5 0.5 .5 }
+		mouseExit { setcolor backcolor .5 .5 .5 .0 }
+		decoration 
+	}
+	
+	
+	
+	
+	itemDef {
+		name back
+		text "BACK"
+		type 1
+		
+		style 0	
+		textstyle 6
+		rect 30 450 40 14 
+		textalign 0
+		textscale .23		
+		textalignx 6
+		textaligny 12
+		forecolor .9 .9 .9 .9
+		visible 1 
+		action { close chapter_menu ; open main }
+		mouseEnter { hide back ; show back_alt ; show message_back }
+	}
+	
+	itemDef {
+		name back_alt
+		text "BACK"
+		type 1
+		
+		style 0	
+		textstyle 6
+		rect 30 450 40 14 
+		textalign 0
+		textscale .23		
+		textalignx 6
+		textaligny 12
+		forecolor .6 .6 .6 .6
+		visible 1 
+		type ITEM_TYPE_BUTTON
+		action { close chapter_menu ; open main }  
+		mouseExit { hide back_alt ; show back ; hide message_back }	 		  
+	}
+	
+	
+	//	MESSAGES	//
+	
+	itemDef {
+		name message_back
+		group grpmessage
+		style 0 
+		rect 320 437 128 30
+		textstyle 1
+		textalign 1
+		textalignx 0
+		textaligny 25
+		textscale .23
+		text "EXIT TO MAIN MENU"
+		forecolor 1 1 1 1
+		decoration 
+		visible 0
+	}
+	
+	
+	
+	
+	
+}
+
+}
