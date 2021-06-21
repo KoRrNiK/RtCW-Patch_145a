@@ -668,7 +668,7 @@ PC_Script_Parse
 =================
 */
 qboolean PC_Script_Parse( int handle, const char **out ) {
-	char script[1024];
+	char script[4096];
 	pc_token_t token;
 
 	memset( script, 0, sizeof( script ) );
@@ -693,11 +693,11 @@ qboolean PC_Script_Parse( int handle, const char **out ) {
 		}
 
 		if ( token.string[1] != '\0' ) {
-			Q_strcat( script, 1024, va( "\"%s\"", token.string ) );
+			Q_strcat( script, 4096, va( "\"%s\"", token.string ) );
 		} else {
-			Q_strcat( script, 1024, token.string );
+			Q_strcat( script, 4096, token.string );
 		}
-		Q_strcat( script, 1024, " " );
+		Q_strcat( script, 4096, " " );
 	}
 	//return qfalse;
 }
@@ -1594,12 +1594,12 @@ int scriptCommandCount = sizeof( commandList ) / sizeof( commandDef_t );
 
 
 void Item_RunScript( itemDef_t *item, const char *s ) {
-	char script[1024], *p;
+	char script[4096], *p;
 	int i;
 	qboolean bRan;
 	memset( script, 0, sizeof( script ) );
 	if ( item && s && s[0] ) {
-		Q_strcat( script, 1024, s );
+		Q_strcat( script, 4096, s );
 		p = script;
 		while ( 1 ) {
 			const char *command;
@@ -1840,7 +1840,7 @@ float Item_Slider_ThumbPosition( itemDef_t *item ) {
 		x = item->window.rect.x;
 	}
 
-	if ( editDef == NULL && item->cvar ) {
+	if (!editDef || !item->cvar) {
 		return x;
 	}
 
@@ -2185,6 +2185,27 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
 				return qtrue;
 			}
 		}
+
+		// Use mouse wheel in vertical and horizontal menus.
+		// If scrolling 3 items would replace over half of the
+		// displayed items, only scroll 1 item at a time.
+		if (key == K_MWHEELUP) {
+			int scroll = viewmax < 6 ? 1 : 3;
+			listPtr->startPos -= scroll;
+			if (listPtr->startPos < 0) {
+				listPtr->startPos = 0;
+			}
+			return qtrue;
+		}
+		if (key == K_MWHEELDOWN) {
+			int scroll = viewmax < 6 ? 1 : 3;
+			listPtr->startPos += scroll;
+			if (listPtr->startPos > max) {
+				listPtr->startPos = max;
+			}
+			return qtrue;
+		}
+
 		// mouse hit
 		if ( key == K_MOUSE1 || key == K_MOUSE2 ) {
 			if ( item->window.flags & WINDOW_LB_LEFTARROW ) {
